@@ -174,8 +174,11 @@
                  let total = totp + totm + totpapi;
                // let total = (data.plastique * 0.100) + (data.Metal * 0.200) + (data.Papier * 0.050);
                 document.getElementById('gains').innerText = total.toFixed(3);
-            }if(total==0){
+           if(total==0){
                 document.getElementById('retbtn').style.display = 'none';
+            } else {
+                document.getElementById('retbtn').style.display = 'block';
+            }
             }
         });
 
