@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriValo - Dashboard Live</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --secondary-blue: #1565c0;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header img {
+            width: 150px; /* Taille du logo */
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--primary-green);
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+
+        .value {
+            display: block;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #222;
+            margin-top: 10px;
+        }
+
+        .gains-section {
+            background: linear-gradient(135deg, var(--primary-green), #1b5e20);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .money { font-size: 3.5em; font-weight: bold; }
+
+        .qr-box {
+            border: 2px dashed var(--primary-green);
+            padding: 20px;
+            border-radius: 15px;
+            background: #f1f8e9;
+            text-align: center;
+        }
+
+        #reader { width: 100%; border-radius: 10px; margin-top: 10px; }
+
+        .btn-scan {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .footer-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <img src="1000031217.jpeg" alt="Logo TriValo">
+            <h2>Tableau de Bord Live</h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="card">
+                <p>Plastique</p>
+                <span id="plastique" class="value">0</span>
+            </div>
+            <div class="card">
+                <p>Métal</p>
+                <span id="metal" class="value">0</span>
+            </div>
+            <div class="card">
+                <p>Papier</p>
+                <span id="papier" class="value">0</span>
+            </div>
+        </div>
+
+        <div class="gains-section">
+            <p>Total de vos gains</p>
+            <span id="gains" class="money">0.000</span> <small>TND</small>
+        </div>
+
+        <div class="qr-box">
+            <h4 style="margin:0; color:var(--primary-green)">📷 Scanner le Bac TriValo</h4>
+            <div id="reader"></div>
+            <button class="btn-scan" id="btn-scan" onclick="startScan()">Ouvrir le Scanner</button>
+        </div>
+
+        <a href="retrait.html" class="footer-link">Retirer mes points →</a>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com/"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const statsRef = database.ref('stats');
+        statsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('plastique').innerText = data.plastique || 0;
+                document.getElementById('metal').innerText = data.Metal || 0;
+                document.getElementById('papier').innerText = data.Papier || 0;
+                
+                let total = (data.plastique * 0.100) + (data.Metal * 0.200) + (data.Papier * 0.050);
+                document.getElementById('gains').innerText = total.toFixed(3);
+            }
+        });
+
+        function startScan() {
+            const html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            document.getElementById("btn-scan").style.display = "none";
+
+            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+                alert("Bac Identifié : " + decodedText);
+                html5QrCode.stop();
+                document.getElementById("reader").innerHTML = "<p style='color:green; font-weight:bold; padding:20px;'>✅ Appareil Connecté</p>";
+            }).catch(err => {
+                alert("Erreur caméra : " + err);
+            });
+        }
+    </script>
+</body>
+</html>
