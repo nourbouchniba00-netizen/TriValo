@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriValo - Retrait de Points</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: #2e7d32; }
+        .balance-card { background: #2e7d32; color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
+        .balance-value { font-size: 2.5em; font-weight: bold; }
+        .option-card { border: 1px solid #ddd; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.3s; }
+        .option-card:hover { border-color: #2e7d32; background-color: #f1f8e9; }
+        .option-card img { width: 50px; margin-right: 15px; border-radius: 5px; }
+        .option-info { text-align: left; }
+        .option-info b { display: block; color: #333; }
+        .btn-back { display: block; margin-top: 20px; color: #666; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Mes Gains</h2>
+        
+        <div class="balance-card">
+            <p>Solde actuel</p>
+            <span id="current-gains" class="balance-value">0.000</span> <small>TND</small>
+        </div>
+
+        <h3 style="text-align: left; color: #555;">Choisir le mode de retrait</h3>
+
+        <div class="option-card" onclick="processWithdraw('Recharge Téléphone')">
+            <div class="option-info">
+                <b>Recharge Téléphone</b>
+                <small>Ooredoo, Orange, TT</small>
+            </div>
+        </div>
+
+        <div class="option-card" onclick="processWithdraw('Bon d\'achat')">
+            <div class="option-info">
+                <b>Bon d'achat (Voucher)</b>
+                <small>Valable dans les magasins partenaires</small>
+            </div>
+        </div>
+
+        <a href="index.html" class="btn-back">← Retour au Dashboard</a>
+    </div>
+
+    <script>
+        // Config Firebase mte3ek s7iha
+        const firebaseConfig = { databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Récupérer les gains en temps réel
+        database.ref('stats').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                let total = (data.plastique * 0.100) + (data.Metal * 0.200) + (data.Papier * 0.050);
+                document.getElementById('current-gains').innerText = total.toFixed(3);
+            }
+        });
+
+        function processWithdraw(method) {
+            alert("Votre demande de retrait via " + method + " est en cours de traitement !");
+            // Hna t-najem t-zid logic bech t-na9as el points mel Firebase ba3d ma y-khallas
+        }
+    </script>
+</body>
+</html>
