@@ -55,6 +55,11 @@
         const firebaseConfig = { databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+         if(total==0){
+                document.getElementById('retbtn').style.display = 'none';
+            } else {
+                document.getElementById('retbtn').style.display = 'block';
+            }
 
         // Récupérer les gains en temps réel
         database.ref('stats').on('value', (snapshot) => {
