@@ -158,7 +158,7 @@
         statsRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                document.getElementById('plastique').innerText = data.plastique || 0;
+                document.getElementById('plastique').innerText = data.Plastique || 0;
                 document.getElementById('metal').innerText = data.Metal || 0;
                 document.getElementById('papier').innerText = data.Papier || 0;
                let  totp=data.plastique?data.plastique * 0.100: 0;
@@ -174,21 +174,3 @@
             }
             }
         });
-
-        function startScan() {
-            const html5QrCode = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-            document.getElementById("btn-scan").style.display = "none";
-
-            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-                alert("Bac Identifié : " + decodedText);
-                html5QrCode.stop();
-                document.getElementById("reader").innerHTML = "<p style='color:green; font-weight:bold; padding:20px;'>✅ Appareil Connecté</p>";
-            }).catch(err => {
-                alert("Erreur caméra : " + err);
-            });
-        }
-    </script>
-</body>
-</html>
