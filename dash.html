@@ -168,8 +168,11 @@
                 document.getElementById('plastique').innerText = data.plastique || 0;
                 document.getElementById('metal').innerText = data.Metal || 0;
                 document.getElementById('papier').innerText = data.Papier || 0;
-                
-                let total = (data.plastique * 0.100) + (data.Metal * 0.200) + (data.Papier * 0.050);
+               let  totp=data.plastique?data.plastique * 0.100: 0;
+                let totm=data.Metal?data.Metal * 0.200: 0;
+                let totpapi=data.Papier?data.Papier * 0.050: 0;
+                 let total = totp + totm + totpapi;
+               // let total = (data.plastique * 0.100) + (data.Metal * 0.200) + (data.Papier * 0.050);
                 document.getElementById('gains').innerText = total.toFixed(3);
             }
         });
