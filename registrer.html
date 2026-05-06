@@ -41,6 +41,7 @@
         function registrer() {
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
+            const name= document.getElementById('reg-name').value;
 
             // Etape 3 : Création de l'identité (Auth)
             firebase.auth().createUserWithEmailAndPassword(email, password)
