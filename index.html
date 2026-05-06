@@ -21,9 +21,9 @@
     <div class="card">
         <img src="1000031217.jpeg" class="logo">
         <h2>Connexion Citoyen</h2>
-        <input type="email" id="login-email" placeholder="Email" required>
-        <input type="password" id="login-password" placeholder="Mot de passe" required>
-        <button onclick="login()">SE CONNECTER</button>
+        <input type="email" id="index-email" placeholder="Email" required>
+        <input type="password" id="index-password" placeholder="Mot de passe" required>
+        <button onclick="index()">SE CONNECTER</button>
         <p class="footer-text">Pas encore de compte ? <a href="registrer.html">S'inscrire</a></p>
     </div>
 
@@ -36,9 +36,9 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const mdp = document.getElementById('login-password').value;
+        function index() {
+            const email = document.getElementById('index-email').value;
+            const mdp = document.getElementById('index-password').value;
 
             // Etape 3 : signInWithEmailAndPassword
             firebase.auth().signInWithEmailAndPassword(email, mdp)
