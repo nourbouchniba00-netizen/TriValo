@@ -23,7 +23,7 @@
         <h2>Connexion Citoyen</h2>
         <input type="email" id="index-email" placeholder="Email" required>
         <input type="password" id="index-password" placeholder="Mot de passe" required>
-        <button onclick="index()">SE CONNECTER</button>
+        <button onclick="dash()">SE CONNECTER</button>
         <p class="footer-text">Pas encore de compte ? <a href="registrer.html">S'inscrire</a></p>
     </div>
 
@@ -41,15 +41,22 @@
             const mdp = document.getElementById('index-password').value;
 
             // Etape 3 : signInWithEmailAndPassword
-            firebase.auth().signInWithEmailAndPassword(email, mdp)
-                .then((userCredential) => {
-                    // Etape 7 : Redirection vers le Dash
-                    window.location.href = "dash.html";
-                })
-                .catch((error) => {
-                    // Etape 5 : Afficher message d'erreur
-                    alert("Erreur de connexion : " + error.message);
-                });
+            firebase.auth().signInWithEmailAndPassword(email, mdp).then((userCredential) => {
+            const user = userCredential.user;
+
+        // Etape 4 : Enregistrer ou mettre à jour l'utilisateur dans la Realtime Database
+         firebase.database().ref('users/' + user.uid).set({
+        email: user.email,
+        last_login: new Date().toISOString(),
+        role: "user" // tu peux ajouter d'autres infos ici
+        }).then(() => {
+        // Etape 7 : Redirection seulement après l'enregistrement
+        window.location.href = "dash.html";
+    });
+})
+.catch((error) => {
+    alert("Erreur de connexion : " + error.message);
+});
         }
     </script>
 </body>
