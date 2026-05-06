@@ -25,6 +25,7 @@
         <h2>Rejoindre TriValo</h2>
         <input type="email" id="reg-email" placeholder="Votre Email" required>
         <input type="password" id="reg-password" placeholder="Mot de passe" required>
+        <input type="confirmpassword" id="reg-confirmpassword-confirm" placeholder="Confirmer le mot de passe" required>
         <input type="name" id="reg-name" placeholder="Votre Nom" required>
         <button onclick="registrer()">CRÉER MON COMPTE</button>
         <p class="footer-text">Déjà inscrit ? <a href="index.html">Se connecter</a></p>
@@ -42,6 +43,7 @@
         function registrer() {
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirmpassword-confirm').value;
             const name= document.getElementById('reg-name').value;
 
             // Etape 3 : Création de l'identité (Auth)
