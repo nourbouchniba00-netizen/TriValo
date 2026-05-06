@@ -2,62 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>TriValo - Connexion</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <title>TriValo - Bienvenue</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1565c0 0%, #2e7d32 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 30px; width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-        .logo { width: 100px; margin-bottom: 15px; border-radius: 50%; }
-        h2 { color: #1565c0; margin-bottom: 25px; font-weight: bold; }
-        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
-        button { width: 100%; padding: 14px; background-color: #1565c0; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { background-color: #0d47a1; transform: translateY(-2px); }
-        .footer-text { margin-top: 20px; font-size: 14px; color: #666; }
-        a { color: #2e7d32; text-decoration: none; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #2e7d32 0%, #1565c0 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 30px; width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        .logo { width: 110px; margin-bottom: 20px; border-radius: 50%; }
+        h1 { color: #2e7d32; margin-bottom: 30px; }
+        .btn { display: block; padding: 15px; margin-bottom: 15px; border-radius: 12px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .btn-login { background: #1565c0; color: white; }
+        .btn-reg { background: #2e7d32; color: white; }
+        .btn:hover { transform: translateY(-3px); opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="card">
-        <img src="1000031217.jpeg" class="logo">
-        <h2>Connexion Citoyen</h2>
-        <input type="email" id="index-email" placeholder="Email" required>
-        <input type="password" id="index-password" placeholder="Mot de passe" required>
-        <button onclick="dash()">SE CONNECTER</button>
-        <p class="footer-text">Pas encore de compte ? <a href="registrer.html">S'inscrire</a></p>
+        <img src="1000031217.jpeg" class="logo" alt="TriValo"> <h1>TriValo</h1>
+        <p>Gagnez des points en triant vos déchets.</p>
+        <a href="login.html" class="btn btn-login">Se Connecter</a>
+        <a href="registrer.html" class="btn btn-reg">Créer un compte</a>
     </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE",
-            authDomain: "trivalo-d676f.firebaseapp.com",
-            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com",
-            projectId: "trivalo-d676f"
-        };
-        firebase.initializeApp(firebaseConfig);
-
-        function index() {
-            const email = document.getElementById('index-email').value;
-            const mdp = document.getElementById('index-password').value;
-
-            // Etape 3 : signInWithEmailAndPassword
-            firebase.auth().signInWithEmailAndPassword(email, mdp).then((userCredential) => {
-            const user = userCredential.user;
-
-        // Etape 4 : Enregistrer ou mettre à jour l'utilisateur dans la Realtime Database
-         firebase.database().ref('users/' + user.uid).set({
-        email: user.email,
-        last_login: new Date().toISOString(),
-        role: "user" // tu peux ajouter d'autres infos ici
-        }).then(() => {
-        // Etape 7 : Redirection seulement après l'enregistrement
-        window.location.href = "dash.html";
-    });
-})
-.catch((error) => {
-    alert("Erreur de connexion : " + error.message);
-});
-        }
-    </script>
 </body>
 </html>

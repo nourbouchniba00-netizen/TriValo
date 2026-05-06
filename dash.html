@@ -2,198 +2,52 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TriValo - Mon Dashboard</title>
-    
+    <title>TriValo - Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
-        :root {
-            --primary-green: #2e7d32;
-            --secondary-blue: #1565c0;
-            --light-bg: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--light-bg);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        /* Barre supérieure avec Déconnexion */
-        .nav-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .user-info { font-size: 14px; color: #666; font-weight: 500; }
-
-        .btn-logout {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-logout:hover { background: #d32f2f; }
-
-        .header { text-align: center; margin-bottom: 30px; }
-        .header img { width: 120px; height: auto; margin-bottom: 10px; }
-        h2 { color: var(--primary-green); margin: 0; }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid #eee;
-            text-align: center;
-            transition: 0.3s;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--primary-green); }
-
-        .value { display: block; font-size: 2em; font-weight: bold; color: #222; }
-
-        .gains-section {
-            background: linear-gradient(135deg, var(--primary-green), #1b5e20);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
-        }
-
-        .money { font-size: 3.5em; font-weight: bold; }
-
-        .footer-link {
-            display: block;
-            text-align: center;
-            background: var(--secondary-blue);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .footer-link:hover { opacity: 0.9; }
+        .header { display: flex; justify-content: space-between; padding: 20px; background: #eee; }
+        .stats { display: flex; gap: 20px; justify-content: center; margin-top: 50px; }
+        .card { padding: 20px; border: 1px solid #ccc; border-radius: 10px; width: 150px; text-align: center; }
+        .btn-retrait { display: block; width: 200px; margin: 30px auto; padding: 15px; background: #2e7d32; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
+    <div class="header">
+        <img src="1000031217.jpeg" width="50" alt="Logo"> <button onclick="logout()">Déconnexion</button> </div>
 
-    <div class="container">
-        <div class="nav-top">
-            <div class="user-info">
-                <i class="fas fa-user"></i> <span id="user-display">Chargement...</span>
-            </div>
-            <button class="btn-logout" onclick="logout()">Déconnexion</button>
-        </div>
-
-        <div class="header">
-            <img src="1000031217.jpeg" alt="Logo TriValo">
-            <h2>Tableau de Bord Live</h2>
-        </div>
-
-        <div class="stats-grid">
-            <div class="card">
-                <p>Plastique</p>
-                <span id="plastique" class="value">0</span>
-            </div>
-            <div class="card">
-                <p>Métal</p>
-                <span id="metal" class="value">0</span>
-            </div>
-            <div class="card">
-                <p>Papier</p>
-                <span id="papier" class="value">0</span>
-            </div>
-        </div>
-
-        <div class="gains-section">
-            <p>Total de vos gains accumulés</p>
-            <span id="gains" class="money">0.000</span> <small>TND</small>
-        </div>
-
-        <a href="retrait.html" class="footer-link" id="retbtn" style="display: none;">Retirer mes points →</a>
+    <div class="stats">
+        <div class="card"><h3>Plastique</h3><span id="p-val">0</span></div>
+        <div class="card"><h3>Métal</h3><span id="m-val">0</span></div>
     </div>
 
-    <script>
-        // Configuration Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE",
-            authDomain: "trivalo-d676f.firebaseapp.com",
-            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com",
-            projectId: "trivalo-d676f"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+    <div style="text-align: center; margin-top: 20px;">
+        <h2>Total Gains: <span id="total-gains">0.000</span> TND</h2>
+    </div>
 
-        // 1. Vérification de l'utilisateur connecté
+    <a href="retrait.html" class="btn-retrait">Aller au Retrait →</a>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", authDomain: "trivalo-d676f.firebaseapp.com", databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", projectId: "trivalo-d676f" };
+        firebase.initializeApp(firebaseConfig);
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                document.getElementById('user-display').innerText = user.email;
-                
-                // 2. Récupérer les données spécifiques à l'UID du citoyen (Etape 3 du diagramme)
-                const statsRef = database.ref('users/' + user.uid + '/stats');
-                statsRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
+                // Etape 8 : Interface mise à jour
+                firebase.database().ref('users/' + user.uid + '/stats').on('value', (snap) => {
+                    const data = snap.val();
                     if (data) {
-                        const p = data.Plastique || 0;
-                        const M = data.Metal || 0;
-                        const C = data.Papier || 0;
-
-                        document.getElementById('plastique').innerText = p;
-                        document.getElementById('metal').innerText = m;
-                        document.getElementById('papier').innerText = pa;
-
-                        // Calcul selon tes tarifs
-                        let total = (p * 0.100) + (m * 0.200) + (pa * 0.050);
-                        document.getElementById('gains').innerText = total.toFixed(3);
-
-                        // Afficher le bouton de retrait seulement si total > 0
-                        document.getElementById('retbtn').style.display = (total > 0) ? 'block' : 'none';
+                        document.getElementById('p-val').innerText = data.Plastique;
+                        document.getElementById('m-val').innerText = data.Metal;
+                        let total = (data.Plastique * 0.100) + (data.Metal * 0.200);
+                        document.getElementById('total-gains').innerText = total.toFixed(3);
                     }
                 });
-            } else {
-                // Rediriger vers index.html si non connecté
-                window.location.href = "index.html";
-            }
+            } else { window.location.href = "login.html"; }
         });
 
-        // Fonction de déconnexion
-        function logout() {
-            firebase.auth().signOut().then(() => {
-                window.location.href = "index.html";
-            });
-        }
+        function logout() { firebase.auth().signOut().then(() => { window.location.href = "login.html"; }); }
     </script>
 </body>
 </html>
