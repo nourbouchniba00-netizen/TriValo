@@ -28,7 +28,7 @@
         <input type="confirmpassword" id="reg-confirmpassword-confirm" placeholder="Confirmer le mot de passe" required>
         <input type="name" id="reg-name" placeholder="Votre Nom" required>
         <button onclick="registrer()">S'INSCRIRE</button>
-        <p class="footer-text"><a href="index.html">>Se connecter</a></p>
+        <p class="footer-text"> deja inscrit ? <a href="index.html">Se connecter</a></p>
     </div>
 
     <script>
@@ -59,7 +59,7 @@
                 })
                 .then(() => {
                     alert("Compte créé avec succès ! Bienvenue chez TriValo.");
-                    window.location.href = "dash.html";
+                    window.location.href = "index.html";
                 })
                 .catch((error) => {
                     alert("Erreur : " + error.message);
