@@ -4,69 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TriValo - Connexion</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    
     <style>
+        :root {
+            --primary-green: #2e7d32;
+            --secondary-blue: #1565c0;
+        }
+
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #2e7d32 0%, #1565c0 100%);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
+
         .login-card {
             background: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 350px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 380px;
             text-align: center;
         }
-        .logo-img {
-            width: 150px; /* Taille de ton logo */
+
+        /* Logo au milieu */
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
             margin-bottom: 20px;
+            border: 3px solid var(--primary-green);
         }
+
         h2 {
-            color: #2e7d32;
-            margin-bottom: 20px;
-            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 800;
         }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
         input {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
+            padding: 14px;
             border: 2px solid #eee;
             border-radius: 12px;
             box-sizing: border-box;
             outline: none;
             transition: 0.3s;
         }
+
         input:focus {
-            border-color: #2e7d32;
+            border-color: var(--primary-green);
         }
-        button {
+
+        /* Bouton Vert */
+        .btn-login {
             width: 100%;
-            padding: 12px;
-            background-color: #2e7d32;
+            padding: 15px;
+            background-color: var(--primary-green);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.1em;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            margin-top: 10px;
         }
-        button:hover {
+
+        .btn-login:hover {
             background-color: #1b5e20;
-            transform: scale(1.02);
+            transform: translateY(-2px);
         }
-        .footer {
+
+        .footer-links {
             margin-top: 20px;
-            font-size: 0.85em;
-            color: #777;
+            font-size: 14px;
+            color: #666;
         }
-        .footer a {
-            color: #1565c0;
+
+        .footer-links a {
+            color: var(--secondary-blue);
             text-decoration: none;
             font-weight: bold;
         }
@@ -75,21 +104,54 @@
 <body>
 
     <div class="login-card">
-        <img src="1000031217.jpeg" alt="Logo TriValo" class="logo-img">
+        <img src="1000031217.jpeg" alt="Logo TriValo" class="logo">
         
-        <h2>Bienvenue chez TriValo</h2>
+        <h2>Connexion</h2>
         
-        <form>
-            <input type="text" placeholder="Email ou Utilisateur" required>
-            <input type="password" placeholder="Mot de passe" required>
-            
-            <button type="button" onclick="window.location.href='index.html'">SE CONNECTER</button>
-        </form>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Adresse Email" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="pass" placeholder="Mot de passe" required>
+        </div>
 
-        <div class="footer">
-            Nouveau ici ? <a href="#">Créer un compte</a>
+        <button class="btn-login" onclick="login()">SE CONNECTER</button>
+
+        <div class="footer-links">
+            Pas encore de compte ? <a href="register.html">S'inscrire</a>
         </div>
     </div>
 
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", 
+            authDomain: "trivalo-d676f.firebaseapp.com", 
+            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", 
+            projectId: "trivalo-d676f" 
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+
+            if(email === "" || pass === "") {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            // Etape 3 du diagramme Auth : Authentification
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then((userCredential) => {
+                // Etape 7 du diagramme Auth : Redirection vers le Dashboard
+                window.location.href = "dash.html";
+            })
+            .catch((error) => {
+                alert("Erreur de connexion : " + error.message);
+            });
+        }
+    </script>
 </body>
 </html>
