@@ -43,8 +43,8 @@
             // Etape 3 : signInWithEmailAndPassword
             firebase.auth().signInWithEmailAndPassword(email, mdp)
                 .then((userCredential) => {
-                    // Etape 7 : Redirection vers le Dashboard
-                    window.location.href = "dashboard.html";
+                    // Etape 7 : Redirection vers le Dash
+                    window.location.href = "dash.html";
                 })
                 .catch((error) => {
                     // Etape 5 : Afficher message d'erreur
