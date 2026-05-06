@@ -2,39 +2,170 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TriValo - Inscription</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --secondary-blue: #1565c0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .register-card {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        /* Logo au milieu */
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid var(--primary-green);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 800;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-green);
+        }
+
+        /* Bouton Vert */
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-register:hover {
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+        }
+
+        .login-link {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; margin-top: 50px;">
-        <h2>Créer un compte Citoyen</h2>
-        <input type="email" id="email" placeholder="Email"><br><br>
-        <input type="password" id="pass" placeholder="Mot de passe"><br><br>
-        <button onclick="register()">S'inscrire</button>
+
+    <div class="register-card">
+        <img src="1000031217.jpeg" alt="Logo TriValo" class="logo">
+        
+        <h2>Créer un compte</h2>
+        
+        <div class="input-group">
+            <input type="text" id="nom" placeholder="Nom complet" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Adresse Email" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="pass" placeholder="Mot de passe" required>
+        </div>
+
+        <button class="btn-register" onclick="register()">S'INSCRIRE MAINTENANT</button>
+
+        <div class="login-link">
+            Déjà inscrit ? <a href="login.html">Se connecter</a>
+        </div>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", authDomain: "trivalo-d676f.firebaseapp.com", databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", projectId: "trivalo-d676f" };
+        // Configuration Firebase
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", 
+            authDomain: "trivalo-d676f.firebaseapp.com", 
+            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", 
+            projectId: "trivalo-d676f" 
+        };
         firebase.initializeApp(firebaseConfig);
 
         function register() {
+            const nom = document.getElementById('nom').value;
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
 
-            // Etape 3 : Création identité
+            if(nom === "" || email === "" || pass === "") {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
             firebase.auth().createUserWithEmailAndPassword(email, pass)
             .then((res) => {
-                // Etape 7 : Initialisation profil
+                // Etape 7 : Initialisation avec Nom, Plastique, Métal et Papier
                 return firebase.database().ref('users/' + res.user.uid + '/stats').set({
-                    Plastique: 0, Metal: 0, Papier: 0
+                    nom: nom,
+                    Plastique: 0, 
+                    Metal: 0, 
+                    Papier: 0,
+                    soldePoints: 0
                 });
             })
             .then(() => {
-                alert("Succès !");
-                window.location.href = "login.html"; // Redirection
-            }).catch(e => alert(e.message));
+                alert("Compte TriValo créé avec succès !");
+                window.location.href = "login.html";
+            })
+            .catch((e) => {
+                alert("Erreur: " + e.message);
+            });
         }
     </script>
 </body>
