@@ -2,144 +2,55 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TriValo - Connexion</title>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #2e7d32 0%, #1565c0 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-card {
-            background: white;
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 350px;
-            text-align: center;
-        }
-        .logo-img {
-            width: 150px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #2e7d32;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.3s;
-        }
-        input:focus {
-            border-color: #2e7d32;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover {
-            background-color: #1b5e20;
-            transform: scale(1.02);
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 0.85em;
-            color: #777;
-        }
-        .footer a {
-            color: #1565c0;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1565c0 0%, #2e7d32 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 30px; width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        .logo { width: 100px; margin-bottom: 15px; border-radius: 50%; }
+        h2 { color: #1565c0; margin-bottom: 25px; font-weight: bold; }
+        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; }
+        button { width: 100%; padding: 14px; background-color: #1565c0; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { background-color: #0d47a1; transform: translateY(-2px); }
+        .footer-text { margin-top: 20px; font-size: 14px; color: #666; }
+        a { color: #2e7d32; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="login-card">
-        <img src="1000031217.jpeg" alt="Logo TriValo" class="logo-img">
-        
-        <h2>Bienvenue chez TriValo</h2>
-        
-        <form id="loginForm">
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Mot de passe" required>
-            
-            <button type="submit">SE CONNECTER</button>
-            <button type="submit">Déconnexion</button>
-        </form>
-
-        <div class="footer">
-            Nouveau ici ? <a href="registrer.html">Créer un compte</a>
-        </div>
+    <div class="card">
+        <img src="1000031217.jpeg" class="logo">
+        <h2>Connexion Citoyen</h2>
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Mot de passe" required>
+        <button onclick="login()">SE CONNECTER</button>
+        <p class="footer-text">Pas encore de compte ? <a href="register.html">S'inscrire</a></p>
     </div>
 
     <script>
-        // Configuration Firebase (Vérifie bien ces informations dans ta console)
         const firebaseConfig = {
             apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE",
             authDomain: "trivalo-d676f.firebaseapp.com",
             databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com",
-            projectId: "trivalo-d676f",
-            storageBucket: "trivalo-d676f.appspot.com",
-            messagingSenderId: "36720468940",
-            appId: "1:36720468940:web:9614f86d63426e25790d64"
+            projectId: "trivalo-d676f"
         };
-
-        // Initialisation
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
 
-        // Gestion de la connexion
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const mdp = document.getElementById('login-password').value;
 
-            auth.signInWithEmailAndPassword(email, password)
+            // Etape 3 : signInWithEmailAndPassword
+            firebase.auth().signInWithEmailAndPassword(email, mdp)
                 .then((userCredential) => {
-                    const user = userCredential.user;
-                    
-                    // Indiquer à la Realtime Database quel utilisateur est actif
-                    return db.ref("active_session").set({
-                        current_uid: user.uid,
-                        timestamp: Date.now()
-                    });
-                })
-                .then(() => {
-                    // Redirection vers le tableau de bord
-                    window.location.href = 'dash.html';
+                    // Etape 7 : Redirection vers le Dashboard
+                    window.location.href = "dashboard.html";
                 })
                 .catch((error) => {
-                    // Affichage des erreurs (ex: mauvais mot de passe)
+                    // Etape 5 : Afficher message d'erreur
                     alert("Erreur de connexion : " + error.message);
                 });
-        });
+        }
     </script>
 </body>
 </html>

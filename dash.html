@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TriValo - Dashboard Live</title>
+    <title>TriValo - Mon Dashboard</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
         :root {
@@ -18,11 +17,10 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--light-bg);
             margin: 0;
             padding: 20px;
-            color: #333;
         }
 
         .container {
@@ -30,26 +28,38 @@
             margin: auto;
             background: white;
             padding: 25px;
-            border-radius: 20px;
+            border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        /* Barre supérieure avec Déconnexion */
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
 
-        .header img {
-            width: 150px; /* Taille du logo */
-            height: auto;
-            margin-bottom: 10px;
+        .user-info { font-size: 14px; color: #666; font-weight: 500; }
+
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
         }
 
-        h2 {
-            color: var(--primary-green);
-            margin: 0;
-            font-size: 1.8em;
-        }
+        .btn-logout:hover { background: #d32f2f; }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header img { width: 120px; height: auto; margin-bottom: 10px; }
+        h2 { color: var(--primary-green); margin: 0; }
 
         .stats-grid {
             display: grid;
@@ -64,61 +74,48 @@
             border-radius: 15px;
             border: 1px solid #eee;
             text-align: center;
+            transition: 0.3s;
         }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary-green); }
 
-        .value {
-            display: block;
-            font-size: 2.2em;
-            font-weight: bold;
-            color: #222;
-            margin-top: 10px;
-        }
+        .value { display: block; font-size: 2em; font-weight: bold; color: #222; }
 
         .gains-section {
             background: linear-gradient(135deg, var(--primary-green), #1b5e20);
             color: white;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 30px;
+            border-radius: 20px;
             text-align: center;
             margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
         }
 
         .money { font-size: 3.5em; font-weight: bold; }
 
-        .qr-box {
-            border: 2px dashed var(--primary-green);
-            padding: 20px;
-            border-radius: 15px;
-            background: #f1f8e9;
-            text-align: center;
-        }
-
-        #reader { width: 100%; border-radius: 10px; margin-top: 10px; }
-
-        .btn-scan {
-            background: var(--primary-green);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
         .footer-link {
             display: block;
             text-align: center;
-            margin-top: 20px;
-            color: var(--secondary-blue);
+            background: var(--secondary-blue);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
             text-decoration: none;
             font-weight: bold;
+            transition: 0.3s;
         }
+        .footer-link:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <div class="nav-top">
+            <div class="user-info">
+                <i class="fas fa-user"></i> <span id="user-display">Chargement...</span>
+            </div>
+            <button class="btn-logout" onclick="logout()">Déconnexion</button>
+        </div>
+
         <div class="header">
             <img src="1000031217.jpeg" alt="Logo TriValo">
             <h2>Tableau de Bord Live</h2>
@@ -140,40 +137,63 @@
         </div>
 
         <div class="gains-section">
-            <p>Total de vos gains</p>
+            <p>Total de vos gains accumulés</p>
             <span id="gains" class="money">0.000</span> <small>TND</small>
         </div>
-  <a href="retrait.html" class="footer-link" id="retbtn">Retirer mes points →</a>
+
+        <a href="retrait.html" class="footer-link" id="retbtn" style="display: none;">Retirer mes points →</a>
     </div>
 
     <script>
+        // Configuration Firebase
         const firebaseConfig = {
-            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com/"
+            apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE",
+            authDomain: "trivalo-d676f.firebaseapp.com",
+            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com",
+            projectId: "trivalo-d676f"
         };
         
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const statsRef = database.ref('stats');
-        statsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                document.getElementById('plastique').innerText = data.Plastique || 0;
-                document.getElementById('metal').innerText = data.Metal || 0;
-                document.getElementById('papier').innerText = data.Papier || 0;
-               let  totp=data.plastique?data.plastique * 0.100: 0;
-                let totm=data.Metal?data.Metal * 0.200: 0;
-                let totpapi=data.Papier?data.Papier * 0.050: 0;
-                 let total = totp + totm + totpapi;
-               // let total = (data.plastique * 0.100) + (data.Metal * 0.200) + (data.Papier * 0.050);
-                document.getElementById('gains').innerText = total.toFixed(3);
-           if(total==0){
-                document.getElementById('retbtn').style.display = 'none';
+        // 1. Vérification de l'utilisateur connecté
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('user-display').innerText = user.email;
+                
+                // 2. Récupérer les données spécifiques à l'UID du citoyen (Etape 3 du diagramme)
+                const statsRef = database.ref('users/' + user.uid + '/stats');
+                statsRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const p = data.Plastique || 0;
+                        const m = data.Metal || 0;
+                        const pa = data.Papier || 0;
+
+                        document.getElementById('plastique').innerText = p;
+                        document.getElementById('metal').innerText = m;
+                        document.getElementById('papier').innerText = pa;
+
+                        // Calcul selon tes tarifs
+                        let total = (p * 0.100) + (m * 0.200) + (pa * 0.050);
+                        document.getElementById('gains').innerText = total.toFixed(3);
+
+                        // Afficher le bouton de retrait seulement si total > 0
+                        document.getElementById('retbtn').style.display = (total > 0) ? 'block' : 'none';
+                    }
+                });
             } else {
-                document.getElementById('retbtn').style.display = 'block';
-            }
+                // Rediriger vers login si non connecté
+                window.location.href = "login.html";
             }
         });
+
+        // Fonction de déconnexion
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "login.html";
+            });
+        }
     </script>
 </body>
 </html>
