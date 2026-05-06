@@ -2,34 +2,145 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TriValo - Retrait</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --secondary-blue: #1565c0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .retrait-card {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Logo au milieu */
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid var(--primary-green);
+        }
+
+        h2 { color: #333; margin-bottom: 10px; }
+        
+        .solde-badge {
+            background: #f1f8e9;
+            color: var(--primary-green);
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-green);
+        }
+
+        /* Bouton Vert */
+        .btn-confirm {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-confirm:hover {
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            margin-top: 20px;
+            display: block;
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; padding: 20px;">
-        <h2>Interface de Retrait</h2>
-        <p>Solde disponible : <b id="display-solde">0.000</b> TND</p>
-        
-        <hr>
-        <h3>Choisir le type de récompense</h3>
-        <select id="reward-type" style="padding: 10px; width: 250px;">
-            <option value="BON">Bon d'achat (Magasin)</option>
-            <option value="TEL">Recharge Téléphonique</option>
-        </select>
-        <br><br>
-        <input type="number" id="amount" placeholder="Montant à retirer (ex: 1.000)" step="0.100" style="padding: 10px;"><br><br>
-        
-        <button onclick="confirmWithdraw()" style="padding: 15px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            CONFIRMER LE RETRAIT
-        </button>
 
-        <p><a href="dash.html">Retour au Dashboard</a></p>
+    <div class="retrait-card">
+        <img src="1000031217.jpeg" alt="Logo TriValo" class="logo">
+        
+        <h2>Retrait</h2>
+        <div class="solde-badge">
+            <span id="display-solde">0.000</span> <small>TND</small>
+        </div>
+        
+        <div class="input-group">
+            <label>Type de récompense</label>
+            <select id="reward-type">
+                <option value="BON">Bon d'achat (Magasin)</option>
+                <option value="TEL">Recharge Téléphonique</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label>Montant (TND)</label>
+            <input type="number" id="amount" placeholder="0.000" step="0.100">
+        </div>
+
+        <button class="btn-confirm" onclick="confirmWithdraw()">CONFIRMER LE RETRAIT</button>
+
+        <a href="dash.html" class="back-link">← Retour au Dashboard</a>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", authDomain: "trivalo-d676f.firebaseapp.com", databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", projectId: "trivalo-d676f" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", 
+            authDomain: "trivalo-d676f.firebaseapp.com", 
+            databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", 
+            projectId: "trivalo-d676f" 
+        };
         firebase.initializeApp(firebaseConfig);
 
         let userUID = null;
@@ -41,10 +152,13 @@
                 firebase.database().ref('users/' + userUID + '/stats').on('value', (snap) => {
                     const data = snap.val();
                     if (data) {
+                        // Calcul du solde (Plastique, Métal, Papier)
                         currentTotal = (data.Plastique * 0.100) + (data.Metal * 0.200) + ((data.Papier || 0) * 0.050);
                         document.getElementById('display-solde').innerText = currentTotal.toFixed(3);
                     }
                 });
+            } else {
+                window.location.href = "login.html";
             }
         });
 
@@ -56,15 +170,14 @@
                 return;
             }
 
-            // Vérification du solde insuffisant
+            // Message Solde insuffisant
             if (currentTotal < montant) {
-                alert("Solde insuffisant pour ce retrait.");
+                alert("Solde insuffisant !");
                 return;
             }
 
-            // Simulation de transaction réussie
-            alert("Succès ! Retrait généré bientôt. Vous recevrez votre code par SMS.");
-            // Ici tu peux ajouter le code firebase.transaction pour déduire le montant
+            // Message Succès Retrait
+            alert("Succès ! Retrait généré bientôt.");
         }
     </script>
 </body>
