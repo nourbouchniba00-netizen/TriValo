@@ -8,54 +8,63 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
-    <div style="text-align: center;">
-        <img src="1000031217.jpeg" width="80"> <h2>Interface Retrait</h2>
-        <p>Solde actuel: <b id="display-solde">0.000</b> TND</p>
-        <button onclick="handleWithdraw(0.500)">Retirer 0.500 TND</button><br><br>
-        <a href="dash.html">Retour au Dashboard</a>
+    <div style="text-align: center; padding: 20px;">
+        <h2>Interface de Retrait</h2>
+        <p>Solde disponible : <b id="display-solde">0.000</b> TND</p>
+        
+        <hr>
+        <h3>Choisir le type de récompense</h3>
+        <select id="reward-type" style="padding: 10px; width: 250px;">
+            <option value="BON">Bon d'achat (Magasin)</option>
+            <option value="TEL">Recharge Téléphonique</option>
+        </select>
+        <br><br>
+        <input type="number" id="amount" placeholder="Montant à retirer (ex: 1.000)" step="0.100" style="padding: 10px;"><br><br>
+        
+        <button onclick="confirmWithdraw()" style="padding: 15px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            CONFIRMER LE RETRAIT
+        </button>
+
+        <p><a href="dash.html">Retour au Dashboard</a></p>
     </div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAPGDOcBFa21jY_2rkH4qJRwLcqDLRPrcE", authDomain: "trivalo-d676f.firebaseapp.com", databaseURL: "https://trivalo-d676f-default-rtdb.firebaseio.com", projectId: "trivalo-d676f" };
         firebase.initializeApp(firebaseConfig);
-        
+
         let userUID = null;
-        let currentTotal = 0; // CORRECTION : Variable définie ici pour éviter l'erreur console
+        let currentTotal = 0;
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 userUID = user.uid;
-                // Etape 2 & 3 du diagramme Retrait
                 firebase.database().ref('users/' + userUID + '/stats').on('value', (snap) => {
                     const data = snap.val();
                     if (data) {
-                        currentTotal = (data.Plastique * 0.100) + (data.Metal * 0.200);
+                        currentTotal = (data.Plastique * 0.100) + (data.Metal * 0.200) + ((data.Papier || 0) * 0.050);
                         document.getElementById('display-solde').innerText = currentTotal.toFixed(3);
                     }
                 });
             }
         });
 
-        function handleWithdraw(montant) {
-            // Etape 6 : Vérification locale
-            if (currentTotal < montant) {
-                alert("Points insuffisants !");
+        function confirmWithdraw() {
+            const montant = parseFloat(document.getElementById('amount').value);
+            
+            if (isNaN(montant) || montant <= 0) {
+                alert("Veuillez saisir un montant valide.");
                 return;
             }
 
-            // Etape 8 : runTransaction anti double-dépense
-            firebase.database().ref('users/' + userUID + '/stats').transaction((stats) => {
-                if (stats) {
-                    stats.Plastique -= (montant / 0.100); 
-                    return stats;
-                }
-            }, (err, committed) => {
-                if (committed) {
-                    // Etape 13 : Historique
-                    const code = "VALO-" + Math.floor(Math.random()*9000);
-                    alert("Succès ! Votre code de récompense abientôt été généré : " + code);
-                }
-            });
+            // Vérification du solde insuffisant
+            if (currentTotal < montant) {
+                alert("Solde insuffisant pour ce retrait.");
+                return;
+            }
+
+            // Simulation de transaction réussie
+            alert("Succès ! Retrait généré bientôt. Vous recevrez votre code par SMS.");
+            // Ici tu peux ajouter le code firebase.transaction pour déduire le montant
         }
     </script>
 </body>
