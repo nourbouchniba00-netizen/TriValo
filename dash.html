@@ -167,8 +167,8 @@
                     const data = snapshot.val();
                     if (data) {
                         const p = data.Plastique || 0;
-                        const m = data.Metal || 0;
-                        const pa = data.Papier || 0;
+                        const M = data.Metal || 0;
+                        const C = data.Papier || 0;
 
                         document.getElementById('plastique').innerText = p;
                         document.getElementById('metal').innerText = m;
@@ -183,7 +183,7 @@
                     }
                 });
             } else {
-                // Rediriger vers login si non connecté
+                // Rediriger vers index.html si non connecté
                 window.location.href = "index.html";
             }
         });
