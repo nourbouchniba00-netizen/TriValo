@@ -4,43 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TriValo - Dashboard</title>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
         :root { --primary-green: #2e7d32; --light-bg: #f8f9fa; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--light-bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        .logo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; }
-        h2 { color: #333; margin-bottom: 25px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
-        .card { background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; }
-        .card h3 { font-size: 0.8em; color: #666; margin: 0; }
-        .value { font-size: 1.5em; font-weight: bold; color: var(--primary-green); }
+        .container { width: 100%; max-width: 450px; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .logo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
+        h2 { color: #333; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+        .card { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #eee; }
+        .card h3 { font-size: 0.75em; color: #666; margin: 0 0 5px 0; }
+        .value { font-size: 1.4em; font-weight: bold; color: var(--primary-green); }
         .solde-box { background: #f1f8e9; padding: 20px; border-radius: 20px; margin-bottom: 25px; }
-        .money { font-size: 2.5em; font-weight: bold; color: #222; }
-        .btn-retrait { background-color: var(--primary-green); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .money { font-size: 2.2em; font-weight: bold; color: #222; }
+        .btn-retrait { background-color: var(--primary-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
         .btn-retrait:disabled { background-color: #ccc; cursor: not-allowed; }
-        .btn-logout { background: none; border: none; color: #888; text-decoration: underline; margin-top: 20px; cursor: pointer; }
+        .btn-logout { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <img src="1000031217.jpeg" alt="Logo TriValo" class="logo">
-        <h2 id="user-name">Tableau de Bord</h2>
+        <img src="1000031217.jpeg" class="logo">
+        <h2 id="user-name">Chargement...</h2>
+        
         <div class="stats-grid">
             <div class="card"><h3>Plastique</h3><span id="p-val" class="value">0</span></div>
             <div class="card"><h3>Métal</h3><span id="m-val" class="value">0</span></div>
             <div class="card"><h3>Papier</h3><span id="pap-val" class="value">0</span></div>
         </div>
+
         <div class="solde-box">
-            <p style="margin:0; color:#555;">Votre solde accumulé</p>
+            <p style="margin:0; color:#555; font-size: 0.9em;">Solde accumulé</p>
             <span id="total-gains" class="money">0.000</span> <small>TND</small>
         </div>
-        <button id="btn-retrait" class="btn-retrait" onclick="checkAndGo()" disabled>Convertir mes gains</button>
+
+        <button id="btn-retrait" class="btn-retrait" onclick="location.href='retrait.html'" disabled>Convertir mes gains</button>
         <button class="btn-logout" onclick="logout()">Déconnexion</button>
     </div>
 
@@ -53,25 +54,23 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        let currentSolde = 0;
-
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                // IMPORTANT: On définit la session active pour le Raspberry Pi
-                firebase.database().ref('active_session').set({
-                    current_uid: user.uid
-                });
+                firebase.database().ref('active_session').set({ current_uid: user.uid });
 
                 firebase.database().ref('users/' + user.uid + '/stats').on('value', (snap) => {
                     const data = snap.val();
                     if (data) {
-                        document.getElementById('user-name').innerText = "Salut, " + (data.nom || "Citoyen");
+                        document.getElementById('user-name').innerText = "Salut, " + (data.nom || "Nour");
                         document.getElementById('p-val').innerText = data.Plastique || 0;
                         document.getElementById('m-val').innerText = data.Metal || 0;
                         document.getElementById('pap-val').innerText = data.Papier || 0;
-                        currentSolde = (data.Plastique * 0.100) + (data.Metal * 0.200) + ((data.Papier || 0) * 0.050);
-                        document.getElementById('total-gains').innerText = currentSolde.toFixed(3);
-                        document.getElementById('btn-retrait').disabled = (currentSolde <= 0);
+
+                        let total = ((data.Plastique || 0) * 0.100) + ((data.Metal || 0) * 0.200) + ((data.Papier || 0) * 0.050);
+                        document.getElementById('total-gains').innerText = total.toFixed(3);
+                        document.getElementById('btn-retrait').disabled = (total <= 0);
+                    } else {
+                        document.getElementById('user-name').innerText = "Données introuvables";
                     }
                 });
             } else {
@@ -79,10 +78,7 @@
             }
         });
 
-        function checkAndGo() { if (currentSolde > 0) window.location.href = "retrait.html"; }
-
         function logout() {
-            // On vide la session avant de quitter
             firebase.database().ref('active_session').remove().then(() => {
                 firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
             });
