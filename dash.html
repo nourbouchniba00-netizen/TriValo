@@ -59,40 +59,37 @@
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                // 1. تحديث الـ active_session باش الـ Raspberry يفيق بيك
+                // 1. تحديث الـ active_session باش الـ Raspberry يقرأ الـ UID الصحيح
                 db.ref('active_session').set({
                     current_uid: user.uid,
                     last_active: Date.now()
                 });
 
-                // 2. قراءة البيانات من المسار الصحيح: users/UID/stats
+                // 2. الاستماع للبيانات في المسار الصحيح: users/UID/stats
                 db.ref('users/' + user.uid + '/stats').on('value', (snap) => {
                     const data = snap.val();
                     if (data) {
-                        // تحديث الاسم
+                        // تحديث واجهة المستخدم بالبيانات الحقيقية
                         document.getElementById('user-name').innerText = "Salut, " + (data.nom || "Utilisateur");
-                        
-                        // تحديث العدادات
                         document.getElementById('p-val').innerText = data.Plastique || 0;
                         document.getElementById('m-val').innerText = data.Metal || 0;
                         document.getElementById('pap-val').innerText = data.Papier || 0;
 
-                        // تحديث المبلغ المالي
+                        // عرض الرصيد المالي بدقة 3 أرقام
                         const solde = parseFloat(data.soldePoints || 0);
                         document.getElementById('total-gains').innerText = solde.toFixed(3);
                         
-                        // تفعيل الزر إذا كان الرصيد أكبر من 0
+                        // تفعيل زر السحب فقط إذا كان الرصيد أكبر من 0
                         document.getElementById('btn-retrait').disabled = (solde <= 0);
                     }
                 });
             } else {
-                // إذا لم يسجل الدخول، ارجع لصفحة login
                 window.location.href = "login.html";
             }
         });
 
         function logout() {
-            // فسخ الجلسة قبل الخروج لضمان الأمان
+            // تنظيف الجلسة النشطة قبل تسجيل الخروج
             db.ref('active_session').remove().then(() => {
                 firebase.auth().signOut().then(() => {
                     window.location.href = "login.html";
