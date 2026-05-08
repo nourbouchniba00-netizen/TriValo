@@ -11,23 +11,25 @@
         :root { --primary-green: #2e7d32; --light-bg: #f8f9fa; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--light-bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 450px; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        .logo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
-        h2 { color: #333; margin-bottom: 20px; }
+        .logo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 2px solid var(--primary-green); }
+        h2 { color: #333; margin-bottom: 20px; font-weight: 800; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .card { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #eee; }
+        .card { background: #fff; padding: 12px; border-radius: 15px; border: 1px solid #eee; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary-green); }
         .card h3 { font-size: 0.75em; color: #666; margin: 0 0 5px 0; }
         .value { font-size: 1.4em; font-weight: bold; color: var(--primary-green); }
-        .solde-box { background: #f1f8e9; padding: 20px; border-radius: 20px; margin-bottom: 25px; }
+        .solde-box { background: #f1f8e9; padding: 20px; border-radius: 20px; margin-bottom: 25px; border: 1px solid #c8e6c9; }
         .money { font-size: 2.2em; font-weight: bold; color: #222; }
         .btn-retrait { background-color: var(--primary-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-retrait:hover:not(:disabled) { background-color: #1b5e20; transform: scale(1.02); }
         .btn-retrait:disabled { background-color: #ccc; cursor: not-allowed; }
-        .btn-logout { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 0.9em; }
+        .btn-logout { background: none; border: none; color: #d32f2f; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 0.9em; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <img src="1000031217.jpeg" class="logo">
+        <img src="1000031217.jpeg" class="logo" alt="TriValo Logo">
         <h2 id="user-name">Chargement...</h2>
         
         <div class="stats-grid">
@@ -53,41 +55,45 @@
             projectId: "trivalo-d676f"
         };
         firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                // 1. On informe le Raspberry Pi que cet utilisateur utilise la machine
-                firebase.database().ref('active_session').set({
-                    current_uid: user.uid
+                // 1. تحديث الـ active_session باش الـ Raspberry يفيق بيك
+                db.ref('active_session').set({
+                    current_uid: user.uid,
+                    last_active: Date.now()
                 });
 
-                // 2. On écoute les données en temps réel dans users/UID/stats
-                firebase.database().ref('users/' + user.uid + '/stats').on('value', (snap) => {
+                // 2. قراءة البيانات من المسار الصحيح: users/UID/stats
+                db.ref('users/' + user.uid + '/stats').on('value', (snap) => {
                     const data = snap.val();
                     if (data) {
+                        // تحديث الاسم
                         document.getElementById('user-name').innerText = "Salut, " + (data.nom || "Utilisateur");
                         
-                        // Affichage des compteurs
+                        // تحديث العدادات
                         document.getElementById('p-val').innerText = data.Plastique || 0;
                         document.getElementById('m-val').innerText = data.Metal || 0;
                         document.getElementById('pap-val').innerText = data.Papier || 0;
 
-                        // Affichage du solde mis à jour par le Raspberry
-                        const solde = data.soldePoints || 0;
-                        document.getElementById('total-gains').innerText = parseFloat(solde).toFixed(3);
+                        // تحديث المبلغ المالي
+                        const solde = parseFloat(data.soldePoints || 0);
+                        document.getElementById('total-gains').innerText = solde.toFixed(3);
                         
-                        // Activation du bouton
+                        // تفعيل الزر إذا كان الرصيد أكبر من 0
                         document.getElementById('btn-retrait').disabled = (solde <= 0);
                     }
                 });
             } else {
+                // إذا لم يسجل الدخول، ارجع لصفحة login
                 window.location.href = "login.html";
             }
         });
 
         function logout() {
-            // Supprimer la session active avant de quitter pour la sécurité
-            firebase.database().ref('active_session').remove().then(() => {
+            // فسخ الجلسة قبل الخروج لضمان الأمان
+            db.ref('active_session').remove().then(() => {
                 firebase.auth().signOut().then(() => {
                     window.location.href = "login.html";
                 });
