@@ -56,21 +56,28 @@
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                firebase.database().ref('active_session').set({ current_uid: user.uid });
+                // 1. On informe le Raspberry Pi que cet utilisateur utilise la machine
+                firebase.database().ref('active_session').set({
+                    current_uid: user.uid
+                });
 
+                // 2. On écoute les données en temps réel dans users/UID/stats
                 firebase.database().ref('users/' + user.uid + '/stats').on('value', (snap) => {
                     const data = snap.val();
                     if (data) {
-                        document.getElementById('user-name').innerText = "Salut, " + (data.nom || "Nour");
+                        document.getElementById('user-name').innerText = "Salut, " + (data.nom || "Utilisateur");
+                        
+                        // Affichage des compteurs
                         document.getElementById('p-val').innerText = data.Plastique || 0;
                         document.getElementById('m-val').innerText = data.Metal || 0;
                         document.getElementById('pap-val').innerText = data.Papier || 0;
 
-                        let total = ((data.Plastique || 0) * 0.100) + ((data.Metal || 0) * 0.200) + ((data.Papier || 0) * 0.050);
-                        document.getElementById('total-gains').innerText = total.toFixed(3);
-                        document.getElementById('btn-retrait').disabled = (total <= 0);
-                    } else {
-                        document.getElementById('user-name').innerText = "Données introuvables";
+                        // Affichage du solde mis à jour par le Raspberry
+                        const solde = data.soldePoints || 0;
+                        document.getElementById('total-gains').innerText = parseFloat(solde).toFixed(3);
+                        
+                        // Activation du bouton
+                        document.getElementById('btn-retrait').disabled = (solde <= 0);
                     }
                 });
             } else {
@@ -79,8 +86,11 @@
         });
 
         function logout() {
+            // Supprimer la session active avant de quitter pour la sécurité
             firebase.database().ref('active_session').remove().then(() => {
-                firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+                firebase.auth().signOut().then(() => {
+                    window.location.href = "login.html";
+                });
             });
         }
     </script>
