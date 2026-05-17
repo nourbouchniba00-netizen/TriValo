@@ -51,6 +51,10 @@
 
             firebase.auth().createUserWithEmailAndPassword(email, pass)
             .then((res) => {
+                firebase.database().ref('users/' + res.user.uid + '/detections').set({
+                    status: "waiting",
+                  types:"none"
+                });
                 return firebase.database().ref('users/' + res.user.uid + '/stats').set({
                     nom: nom,
                     Plastique: 0, 
